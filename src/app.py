@@ -14,6 +14,7 @@ CORS(app)
 
 # create the jackson family object
 jackson_family = FamilyStructure("Jackson")
+members = jackson_family.get_all_members()
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -29,14 +30,35 @@ def sitemap():
 def handle_hello():
 
     # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
+    
     response_body = {
-        "hello": "world",
-        "family": members
+        "family": jackson_family.get_all_members()
     }
 
 
     return jsonify(response_body), 200
+
+@app.route('/members/<int:member_id>', methods=['GET'])
+def get_member(member_id):
+    member = jackson_family.get_member(member_id)
+    if member is None:
+        return jsonify({"member": 'There is not member with provided id.'}), 400
+
+    return jsonify({"member": member}), 200
+
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+    request_data = request.get_json()
+    if(member_id is None):
+        return jsonify({"Message": 'You must provide an member_id'}), 400
+    if request_data['first_name'] is not None and request_data['age'] is not None and request_data['name'] is not None and request_data['lucky_numbers'] is not None:
+        member = jackson_family.get_member(member_id)
+        if member is not None:
+            jackson_family.delete_member(member)
+            return jsonify({"members": jackson_family.get_all_members()})
+        if member is None:
+            return jsonify({"member": 'There is not member with provided id.'}), 400
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
