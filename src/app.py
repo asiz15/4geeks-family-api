@@ -59,6 +59,16 @@ def delete_member(member_id):
         if member is None:
             return jsonify({"member": 'There is not member with provided id.'}), 400
 
+@app.route('/members/<int:member_id>', methods=['POST'])
+def add_member(member_id):
+    request_data = request.get_json()
+    if(member_id is None):
+        return jsonify({"Message": 'You must provide an member_id'}), 400
+    if request_data['first_name'] is not None and request_data['age'] is not None and request_data['name'] is not None and request_data['lucky_numbers'] is not None:
+        jackson_family.add_member({"first_name": request_data['first_name'], "age": request_data['age'], "lucky_numbers": request_data['lucky_numbers'], "id": jackson_family._generateId() })
+        return jsonify({"members": jackson_family.get_all_members()}),200
+    else
+        return jsonify({"message": "Bad request"}),400
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
